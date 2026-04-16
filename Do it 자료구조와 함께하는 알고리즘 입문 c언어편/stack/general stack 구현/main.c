@@ -1,3 +1,7 @@
+/*
+general stack 구현을 test한다.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "IntStack.h"
