@@ -9,7 +9,7 @@ typedef struct{
     int num; 
     int max; 
     int front; 
-    int reer; 
+    int rear; 
     int* que; 
 }IntQueue;
 
