@@ -9,15 +9,15 @@ Ring Int Queue 사용을 위한 IntQueue.h의 implement file 이다.
 int init_IntQueue(IntQueue *q, int max){
     if((q->que = calloc(max, sizeof(int))) == NULL) return -1; 
     q->max = max; 
-    q->num = q->front = q->reer = 0; 
+    q->num = q->front = q->rear = 0; 
     return 0; 
 }
 
 int enqueue(IntQueue *q, int x){
     if(q->num >= q->max) return -1;
-    q->que[q->reer] = x; 
-    q->reer++; 
-    if(q->reer >= q->max) q->reer = 0;  
+    q->que[q->rear] = x; 
+    q->rear++; 
+    if(q->rear >= q->max) q->rear = 0;  
     q->num++;
     return 0; 
 }
@@ -38,7 +38,7 @@ int peek(const IntQueue *q, int *x){
 }
 
 void clear(IntQueue *q){
-    q->num = q->front = q->reer = 0; 
+    q->num = q->front = q->rear = 0; 
 }
 
 int capacity(const IntQueue *q){
@@ -88,5 +88,5 @@ void print_IntQueue(const IntQueue *q){
 
 void terminate(IntQueue *q){
     if(q->que != NULL) free(q->que); 
-    q->max = q->num = q->front = q->reer = 0; 
+    q->max = q->num = q->front = q->rear = 0; 
 }
