@@ -1,5 +1,7 @@
 /*
 N-Queen 을 recursive하게 구현하라
+* 각각의 경우의 board를 출력하라
+* 모든 가능한 경우의 수를 출력하라
 */
 
 #include <stdio.h>
@@ -58,8 +60,11 @@ void set(int i){
 
 
 void print_pos(){
-    for(int* p = pos; p < pos + N; p++){
-        printf("% 2d",*p);
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < pos[i] ; j++) putchar('O');
+        putchar('*');
+        for(int j = pos[i] + 1; j < N ; j++) putchar('O');
+        putchar('\n');
     }
     putchar('\n');
 }
