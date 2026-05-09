@@ -1,5 +1,6 @@
 /*
 quick sort 를 recursive가 아닌 implementary하게 작성
+작은 구간을 먼저 push하는 방식으로 공간 복잡도를 O(log n)으로 설정
 */
 
 /* 실행결과
@@ -51,7 +52,7 @@ int main(void) {
 }
 
 void quick_sort_impl(int a[], int n){
-    node* st = calloc(n, sizeof(node));  
+    node st[30];  
     int top = -1; 
     st[++top] = (node){0, n - 1}; 
     while(top != -1){
@@ -69,10 +70,17 @@ void quick_sort_impl(int a[], int n){
                 pr--; 
             }
         }while(pl <= pr);
-        if(pl < curr.right) st[++top] = (node){pl, curr.right}; 
-        if(pr > curr.left) st[++top] = (node){curr.left, pr}; 
+            
+        // 요소의 개수가 많은 걸 먼저 push
+        if((pl - curr.right) < (pr-curr.left)){
+            if(pr > curr.left) st[++top] = (node){curr.left, pr};
+            if(pl < curr.right) st[++top] = (node){pl, curr.right}; 
+        }
+        else{
+            if(pl < curr.right) st[++top] = (node){pl, curr.right};
+            if(pr > curr.left) st[++top] = (node){curr.left, pr};
+        }
     }
-    free(st);
 }
 
 void print_progress(const int a[], int left, int right){
