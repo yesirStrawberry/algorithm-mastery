@@ -1,3 +1,7 @@
+/*
+string을 ASC로 정렬한다.
+*/
+
 #include <stdio.h>
 #include <string.h>
 
