@@ -2,6 +2,16 @@
 merge sort를 wrapper을 활용하여 단순화 하시오.
 */
 
+/* 개선점
+01_merge에서는 buff에 대한 동적 메모리할당이 재귀를 진행할 때마다 진행됨
+-> buff를 한 번만 할당하게 됨
+
+01_merge에서는 mergesort(a, 0, n - 1)로 call시 index를 혼돈할 여지가 있었음
+-> mergesort(a, n); 으로 함수 선언 시 실수를 줄임
+
+__mergesort를 static으로 선언하여, 켑슐화의 이점을 갖게 됨./
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
