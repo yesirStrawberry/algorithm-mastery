@@ -33,24 +33,23 @@ static void shift_down(int array[], int start_idx, int end_idx){
     int selected_child_idx; 
     
     while(true){
-        int lchild_idx = parent_idx*2 + 1; 
-        int rchild_idx = lchild_idx + 1; 
+        int lchild_idx = (parent_idx * 2) + 1;
+        int rchild_idx = (parent_idx * 2) + 2; 
         
         bool has_left_child = (lchild_idx <= end_idx); 
         if(!has_left_child) break; 
         
-        bool has_larger_right_child = 
-            (rchild_idx <= end_idx && array[rchild_idx] > array[lchild_idx]); 
-        if(has_larger_right_child){
-            selected_child_idx = rchild_idx; 
+        bool has_right_child = (rchild_idx <= end_idx); 
+        bool has_larger_right_child = (array[lchild_idx] <= array[rchild_idx]); 
+        
+        if(has_right_child && has_larger_right_child){
+            selected_child_idx = rchild_idx;     
         }else{
             selected_child_idx = lchild_idx; 
         }
         
-        bool has_heap_order = (target_val >= array[selected_child_idx]); 
-        if(has_heap_order){
-            break;
-        }
+        bool has_heap_order = (array[selected_child_idx] <= target_val);
+        if(has_heap_order) break; 
 
         array[parent_idx] = array[selected_child_idx]; 
         parent_idx = selected_child_idx; 
