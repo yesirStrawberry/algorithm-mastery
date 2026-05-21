@@ -1,3 +1,7 @@
+/*
+어떤 type이던 정렬할 수 있는 general한 hsort 함수 작성
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +18,7 @@ typedef struct{
 static void shift_down(HsortContext* htx, int start_idx, int end_idx);  
 static void generic_swap(void* x, void* y, size_t size, char* temp_ptr); 
 
-void hsort(void* base, size_t size, size_t nmemb, int(*compar)(void*, void*)){
+void hsort(void* base, size_t nmemb, size_t size, int(*compar)(void*, void*)){
     if(nmemb <= 1) return; 
     char* global_temp = (char*)malloc(size);
     char* target_ptr = (char*)malloc(size); 
@@ -61,10 +65,12 @@ static void shift_down(HsortContext* htx, int start_idx, int end_idx){
         
         // 올바른 자식 선택
         bool has_rchild = (rchild_idx <= end_idx); 
-        
-        lchild_ptr = base_ptr + (lchild_idx * size); 
-        rchild_ptr = base_ptr + (rchild_idx * size); 
-        bool has_larger_right_child = (htx->compar(lchild_ptr, rchild_ptr) > 0); 
+        bool has_larger_right_child = false; 
+        if(has_rchild){
+            lchild_ptr = base_ptr + (lchild_idx * size); 
+            rchild_ptr = base_ptr + (rchild_idx * size); 
+            has_larger_right_child = (htx->compar(rchild_ptr, lchild_ptr) > 0);     
+        }
         if(has_rchild && has_larger_right_child){
             selected_child_idx = rchild_idx; 
         }else{
@@ -73,7 +79,7 @@ static void shift_down(HsortContext* htx, int start_idx, int end_idx){
         
         // 만약 heap 상태면 break
         selected_child_ptr = base_ptr + (selected_child_idx * size); 
-        bool has_heap_order = (htx->compar(htx->target_ptr, selected_child_ptr) > 0); 
+        bool has_heap_order = (htx->compar(htx->target_ptr, selected_child_ptr) >= 0); 
         if(has_heap_order) break; 
         
         // parent update 하고 아래 층 탐색
@@ -95,8 +101,8 @@ static void generic_swap(void* x, void* y, size_t size, char* temp_ptr){
 
 
 int int_cmp(void* a, void* b){
-    if(*(int*)a < *(int*)b) return 1; 
-    else if(*(int*)a > *(int*)b) return -1;
+    if(*(int*)a < *(int*)b) return -1; 
+    else if(*(int*)a > *(int*)b) return 1;
     else return 0; 
 }
 
@@ -113,27 +119,3 @@ int main()
     putchar('\n');
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
