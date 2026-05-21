@@ -10,19 +10,19 @@
 typedef struct{
     void* base;
     size_t size; 
-    int(*compar)(void*, void*); 
+    int(*compar)(const void*,const void*); 
     char* temp_ptr; 
     char* target_ptr; 
 }HsortContext; 
 
-static void shift_down(HsortContext* htx, int start_idx, int end_idx);  
+static void shift_down(HsortContext* htx, size_t start_idx, size_t end_idx);  
 static void generic_swap(void* x, void* y, size_t size, char* temp_ptr); 
 
-void hsort(void* base, size_t nmemb, size_t size, int(*compar)(void*, void*)){
+void hsort(void* base, size_t nmemb, size_t size, int(*compar)(const void*,const void*)){
     if(nmemb <= 1) return; 
     char* global_temp = (char*)malloc(size);
     char* target_ptr = (char*)malloc(size); 
-    if(global_temp == NULL && target_ptr == NULL) return; 
+    if(global_temp == NULL || target_ptr == NULL) return; 
     
     HsortContext htx = (HsortContext){base, size, compar, global_temp, target_ptr}; 
     char* base_ptr = base; 
@@ -36,10 +36,13 @@ void hsort(void* base, size_t nmemb, size_t size, int(*compar)(void*, void*)){
         generic_swap(base_root_ptr, base_last_ptr, size, htx.temp_ptr);
         shift_down(&htx, 0, last_idx - 1); 
     }
+    
+    free(global_temp); 
+    free(target_ptr); 
     return; 
 }
 
-static void shift_down(HsortContext* htx, int start_idx, int end_idx){
+static void shift_down(HsortContext* htx, size_t start_idx, size_t end_idx){
     char* base_ptr = htx->base; 
     size_t size = htx->size; 
     
@@ -100,7 +103,7 @@ static void generic_swap(void* x, void* y, size_t size, char* temp_ptr){
 }
 
 
-int int_cmp(void* a, void* b){
+int int_cmp(const void* a,const void* b){
     if(*(int*)a < *(int*)b) return -1; 
     else if(*(int*)a > *(int*)b) return 1;
     else return 0; 
@@ -119,3 +122,4 @@ int main()
     putchar('\n');
     return 0;
 }
+
