@@ -1,37 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void fsort_int(int a[], int n){
+void fsort_int(int arr[], int nmemb){
     // max 값 구하기
-    int max = a[0]; 
-    for(int i = 0; i < n; i++){
-        if(max < a[i]) max = a[i]; 
+    int max = arr[0]; 
+    for(int i = 1; i < nmemb; i++){
+        if(max < arr[i]) max = arr[i]; 
     }
     
-    int* f = calloc(max + 1, sizeof(int)); 
-    int* b = calloc(n, sizeof(int)); 
+    int* freq = calloc(max + 1, sizeof(int)); // calloc은 0으로 자동 초기화됨
+    int* sorted = calloc(nmemb, sizeof(int)); 
     
     // f : 도수분포표 
-    for(int i = 0; i <= max; i++) f[i] = 0; 
-    for(int i = 0; i < n; i++){
-        f[a[i]]++; 
+    for(int i = 0; i < nmemb; i++){
+        freq[arr[i]]++; 
     }
     
     // f : 누적도수분포표
     for(int i = 1; i <= max; i++){
-        f[i] += f[i - 1]; 
+        freq[i] += freq[i - 1]; 
     }
     
     // b : 정렬이 완료된 배열
-    for(int i = n - 1; i >= 0; i--){
-        b[--f[a[i]]] = a[i]; 
+    for(int i = 0; i < nmemb; i++){
+        sorted[--freq[arr[i]]] = arr[i]; 
     }
     
     // 배열 복사
-    for(int i = 0; i < n; i++) a[i] = b[i]; 
+    for(int i = 0; i < nmemb; i++) arr[i] = sorted[i]; 
     
-    free(f); 
-    free(b); 
+    free(freq); 
+    free(sorted); 
 }
 
 
