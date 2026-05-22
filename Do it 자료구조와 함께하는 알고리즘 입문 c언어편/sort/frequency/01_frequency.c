@@ -13,6 +13,13 @@ freq 함수에 들어갈 자리를 정하려면, 결국 generic의 member을 int
 할 수는 있지만, 비교함수를 직접 만들어주는 것 만큼 깔끔하지는 않은 것 같음
 */
 
+/*
+수행결과
+
+before sort : 5 6 4 8 3 7 9 0 1 5 2 3 
+ after sort : 0 1 2 3 3 4 5 5 6 7 8 9
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
