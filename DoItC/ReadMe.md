@@ -26,11 +26,15 @@
 ## 💻 개발 환경
 
 * **Language** : C
-* **Compiler** : GCC (또는 사용 중인 환경으로 변경 가능)
+* **Compiler** : GCC
+* **WorkPlace** : [online gdb](https://www.onlinegdb.com/online_c_compiler)
+
+  * 군 사지방 컴퓨터에서는 vs code의 다운로드가 불가함
+  * online gdb는 header, source, main 을 각각 나누어 작성할 수 있음으로 선택  
 
 ---
 
 ## 📌 목표 및 규칙
 
 1.  **가능한 실무에 가깝게** : 남이 봐도 이해가능하게 명시적이고 구조적으로 작성
-2.  **가능한 General하게**   : type별로 서로 다른 함수를 사용하는 것이 아닌, generic에 적용가능한 함수를 작성
+2.  **가능한 General하게**   : type별로 서로 다른 함수를 사용하는 것이 아닌, generic에 적용가능한 함수를 작성하려고 노력
