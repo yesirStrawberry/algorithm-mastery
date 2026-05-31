@@ -48,7 +48,7 @@ char* str_str(const char txt[], const char pat[]){
     int txt_len = strlen(txt);
     int pat_len = strlen(pat);
     int skip[UCHAR_MAX + 1];
-    if(pat_len == 0) return NULL;
+    if(pat_len == 0) return (char*)txt;
 
     // skip array setting
     for(px = 0; px < UCHAR_MAX + 1; px++){
