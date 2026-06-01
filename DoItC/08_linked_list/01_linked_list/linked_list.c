@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include "linked_list.h"
 
 static Node* alloc_node(void){
     Node *new_node = calloc(1, sizeof(Node)); 
@@ -16,7 +17,7 @@ static Node* alloc_node(void){
 static bool set_node(Node *n, const member *x, const Node *next){
     if(n == NULL || x == NULL) return false; 
     n->data = *x; 
-    n->next = next; 
+    n->next = (Node*)next; 
     return true; 
 }
 
@@ -44,7 +45,7 @@ Node* search(List *list, const member* x, int compare(const member *x, const mem
 bool insert_front(List *list, const member *x){
     if(list == NULL || x == NULL) return false; 
     
-    node *ptr = list->head; 
+    Node *ptr = list->head; 
     Node *new_node = alloc_node();
     
     list->head = new_node; 
@@ -106,7 +107,7 @@ bool remove_reer(List *list){
     }
     
     // cut tail
-    set_node(pre, pre->data, NULL);
+    set_node(pre, &pre->data, NULL);
     list->crnt = pre; 
     free(ptr); 
     
@@ -129,7 +130,7 @@ bool remove_current(List *list){
     }
     
     // cut current node; 
-    set_node(pre, pre->data, ptr->next); 
+    set_node(pre, &pre->data, ptr->next); 
     list->crnt = pre; 
     free(ptr); 
     
@@ -145,7 +146,7 @@ void clear(List *list){
         free(ptr); 
         ptr = next_ptr; 
     }
-    list->head = NULL: 
+    list->head = NULL; 
     list->crnt = NULL; 
 }
 
@@ -160,8 +161,8 @@ void print_node(const List *list){
 void print_list(const List *list){
     if(list->head == NULL) return; 
     Node *ptr = list->head; 
-    while(ptr->next != NULL){
-        print_member(&pre->data); 
+    while(ptr != NULL){
+        print_member(&ptr->data); 
         ptr = ptr->next; 
     }
     return; 
