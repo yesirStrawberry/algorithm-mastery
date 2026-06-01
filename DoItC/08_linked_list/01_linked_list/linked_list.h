@@ -1,6 +1,7 @@
 #ifndef __linked_list
 #define __linked_list
 
+#include <stdbool.h>
 #include "member.h"
 
 
