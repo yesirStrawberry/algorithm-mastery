@@ -5,5 +5,5 @@
 void print_member(const member *x){
     puts("--------------"); 
     printf("name : %s\n", x->name); 
-    printf("age  : %s\n", x->age); 
+    printf("age  : %d\n", x->age); 
 }
