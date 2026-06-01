@@ -155,14 +155,18 @@ void print_node(const List *list){
         puts("list->crnt : NULL"); 
     } 
     print_member(&list->crnt->data);
+    printf("next : %lo\n", list->crnt->next);
     return;
 }
 
 void print_list(const List *list){
     if(list->head == NULL) return; 
     Node *ptr = list->head; 
+    puts("--------------");
+    puts("print_list");
     while(ptr != NULL){
         print_member(&ptr->data); 
+        printf("next : %lo\n", ptr->next);
         ptr = ptr->next; 
     }
     return; 
