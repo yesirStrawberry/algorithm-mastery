@@ -7,6 +7,7 @@
 <p align="center">
   <img src="https://image.yes24.com/goods/57798536/XL" alt="Do it! 자료구조와 함께하는 알고리즘 입문 C언어 편" width="300">
 </p>
+
 ---
 
 ## 📌 목표 및 규칙
@@ -30,6 +31,7 @@
 | `05_sort` | 정렬 알고리즘 (버블, 선택, 삽입, 셸, 퀵, 병합, 힙, 도수 정렬 등) |
 | `06_set` | 배열로 집합 구현하기 |
 | `07_string` | 문자열 다루기 |
+| `08_list` | 연결 리스트 구현 |
 ---
 
 ## 💻 개발 환경
@@ -38,5 +40,5 @@
 * **Compiler**  : GCC
 * **WorkPlace** : [online gdb](https://www.onlinegdb.com/online_c_compiler)
 
-  * 군 사지방 컴퓨터에서는 vs code의 다운로드가 불가함
-  * online gdb는 header, source, main 을 각각 나누어 작성할 수 있음으로 선택  
+  * 군 사지방 컴퓨터에서는 vs code의 다운로드 및 터미널 사용이 불가합니다.
+  * online gdb는 header, source, main 을 각각 나누어 작성할 수 있음으로 선택하였습니다.  
