@@ -14,19 +14,19 @@ typedef struct{
     Node *crnt;
 }List;
 
-void init_list(List *list);
+bool init_list(List *list);
 
 Node* search(List *list, const member* x, int compare(const member *x, const member *y));
 
 bool insert_front(List *list, const member *x);
 
-void insert_reer(List *list, const member *x);
+bool insert_reer(List *list, const member *x);
 
 bool remove_front(List *list);
 
-void remove_reer(List *list);
+bool remove_reer(List *list);
 
-void remove_current(List *list);
+bool remove_current(List *list);
 
 void clear(List *list);
 
