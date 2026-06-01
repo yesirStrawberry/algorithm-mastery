@@ -29,9 +29,10 @@ bool init_list(List *list){
 
 Node* search(List *list, const member* x, int compare(const member *x, const member *y)){
     if(list->head == NULL) return NULL;
+    
     Node *ptr = list->head; 
     while(ptr != NULL){
-        if(compare(&ptr->date, x) == 0){
+        if(compare(&ptr->data, x) == 0){
             list->crnt = ptr; 
             return ptr; 
         }
@@ -58,7 +59,7 @@ bool insert_reer(List *list, const member *x){
     
     if(list->head == NULL){
         bool is_non_error = insert_front(list, x); 
-        return insert_front; 
+        return is_non_error; 
     }
     
     // 기존 tail node : ptr 찾기
@@ -67,51 +68,59 @@ bool insert_reer(List *list, const member *x){
         ptr = ptr->next; 
     }
     
-    node *new_node = alloc_node(); 
+    // 새로운 tail node : new_node 생성
+    Node *new_node = alloc_node(); 
     if(new_node == NULL) return false; 
     
     ptr->next = new_node;
     list->crnt = new_node; 
     
-    set_node(new_node, x, NULL); 
+    bool is_set_node_true = set_node(new_node, x, NULL); 
+    if(is_set_node_true) return false;  
+    return true; 
 }
 
 bool remove_front(List *list){
     if(list == NULL || list->head == NULL) return false; 
 
-    Node *tmp = list->head; 
+    Node *ptr = list->head; 
     list->head = list->crnt = list->head->next; 
 
-    free(tmp);
+    free(ptr);
     return true; 
 }
 
-void remove_reer(List *list){
-    if(list->head == NULL) return; 
+bool remove_reer(List *list){
+    if(list->head == NULL) return false; 
     if(list->head->next == NULL){
-        remove_front(list);
-        return; 
+        bool is_non_error = remove_front(list);
+        return is_non_error; 
     }
+    
+    // ptr : tail, pre : tail - 1; 
     Node *ptr = list->head; 
     Node *pre; 
-    
     while(ptr->next != NULL){
         pre = ptr; 
         ptr = ptr->next; 
     }
+    
+    // cut tail
     set_node(pre, pre->data, NULL);
     list->crnt = pre; 
     free(ptr); 
+    
+    return true;
 }
 
-void remove_current(List *list){
-    if(list->head == NULL) return; 
+bool remove_current(List *list){
+    if(list->head == NULL) return false; 
     if(list->head->next == NULL) {
-        remove_front(list);
-        return;
+        bool is_non_error = remove_front(list);
+        return is_non_error;
     } 
     
-    // find pre
+    // ptr : crnt, pre : crnt - 1
     Node *ptr = list->head;
     Node *pre;
     while(ptr != list->crnt){
@@ -123,30 +132,34 @@ void remove_current(List *list){
     set_node(pre, pre->data, ptr->next); 
     list->crnt = pre; 
     free(ptr); 
+    
+    return true; 
 }
 
 void clear(List *list){
     if(list == NULL) return; 
 
-    Node *curr = list->head; 
-    while(curr != NULL){
-        node *next_curr = curr->next; 
-        free(curr); 
-        curr = next_curr; 
+    Node *ptr = list->head; 
+    while(ptr != NULL){
+        Node *next_ptr = ptr->next; 
+        free(ptr); 
+        ptr = next_ptr; 
     }
     list->head = NULL: 
     list->crnt = NULL; 
 }
 
 void print_node(const List *list){
-    if(list->crnt == NULL) return; 
+    if(list->crnt == NULL){
+        puts("list->crnt : NULL"); 
+    } 
     print_member(&list->crnt->data);
     return;
 }
 
 void print_list(const List *list){
     if(list->head == NULL) return; 
-    node *ptr = list->head; 
+    Node *ptr = list->head; 
     while(ptr->next != NULL){
         print_member(&pre->data); 
         ptr = ptr->next; 
@@ -158,29 +171,3 @@ void terminate_list(List *list){
     clear(list); 
     return; 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
