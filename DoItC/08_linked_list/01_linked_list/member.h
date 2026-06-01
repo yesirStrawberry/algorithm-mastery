@@ -2,9 +2,9 @@
 #define __member
 
 typedef struct{
-    char name[]; 
+    char* name; 
     int age; 
-}member
+}member;
 
 void print_member(const member *x);
 
