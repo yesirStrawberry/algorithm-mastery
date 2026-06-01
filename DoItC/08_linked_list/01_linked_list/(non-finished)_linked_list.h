@@ -7,6 +7,7 @@
 /* header for source
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 */
 
 typedef struct __node{
@@ -56,10 +57,14 @@ Node* search(List *list, const member* x, int compare(const member *x, const mem
     return NULL;
 }
 
-void insert_front(List *list, const member *x){
-    Node *ptr = list->head; 
-    list->head = list->crnt = alloc_node(); 
-    set_node(list->head, x, ptr); 
+bool insert_front(List *list, const member *x){
+    if(list == NULL || x == NULL) return false; 
+    node *ptr = list->head; 
+    Node *new_node = alloc_node();
+    list->head = new_node; 
+    list->crnt = new_node; 
+    set_node(new_node, x, ptr); 
+    return true; 
 }
 
 void insert_reer(List *list, const member *x){
@@ -77,12 +82,14 @@ void insert_reer(List *list, const member *x){
     set_node(ptr->next, x, NULL); 
 }
 
-void remove_front(List *list){
-    if(list->head == NULL) return; 
-    
-    Node *ptr = list->head->next; 
-    free(list->head);
-    list->head = list->crnt = ptr; 
+bool remove_front(List *list){
+    if(list == NULL || list->head == NULL) return false; 
+
+    Node *tmp = list->head; 
+    list->head = list->crnt = list->head->next; 
+
+    free(tmp);
+    return true; 
 }
 
 void remove_reer(List *list){
@@ -125,9 +132,15 @@ void remove_current(List *list){
 }
 
 void clear(List *list){
-    while(list->head != NULL){
-        remove_front(list); 
+    if(list == NULL) return; 
+
+    Node *curr = list->head; 
+    while(curr != NULL){
+        node *next_curr = curr->next; 
+        free(curr); 
+        curr = next_curr; 
     }
+    list->head = NULL: 
     list->crnt = NULL; 
 }
 
