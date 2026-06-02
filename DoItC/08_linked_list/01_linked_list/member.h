@@ -2,7 +2,7 @@
 #define __member
 
 typedef struct{
-    char* name; 
+    char name[20]; 
     int age; 
 }member;
 
