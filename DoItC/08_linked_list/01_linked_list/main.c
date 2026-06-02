@@ -22,6 +22,7 @@ void dump_status(const char *title, const List *list) {
     printf("----------------------------------------\n");
     printf("Current List Elements:\n");
     print_list(list);
+    printf("----------------------------------------\n");
     printf("Current Selected Node (crnt):\n");
     print_node(list);
     printf("========================================\n");
