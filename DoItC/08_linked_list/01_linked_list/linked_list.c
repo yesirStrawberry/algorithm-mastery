@@ -116,7 +116,7 @@ bool remove_reer(List *list){
 
 bool remove_current(List *list){
     if(list->head == NULL) return false; 
-    if(list->head->next == NULL) {
+    if(list->head->next == NULL || list->head == list->crnt) {
         bool is_non_error = remove_front(list);
         return is_non_error;
     } 
@@ -153,14 +153,20 @@ void clear(List *list){
 void print_node(const List *list){
     if(list->crnt == NULL){
         puts("list->crnt : NULL"); 
+        return; 
     } 
+    puts("--------------");
+    puts("print_node");
     print_member(&list->crnt->data);
     printf("next : %lo\n", list->crnt->next);
     return;
 }
 
 void print_list(const List *list){
-    if(list->head == NULL) return; 
+    if(list == NULL|| list->head == NULL) {
+        puts("empty list");
+        return;
+    } 
     Node *ptr = list->head; 
     puts("--------------");
     puts("print_list");
