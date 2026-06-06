@@ -15,6 +15,7 @@ typedef struct{
 
 typedef struct{
     Node *arr; 
+    Index size; 
     Index head; 
     Index crnt; 
     Index max; 
@@ -40,6 +41,8 @@ void clear(List *list);
 void print_node(const List *list);
 
 void print_list(const List *list);
+
+void print_array(const List *list);
 
 void terminate_list(List *list); 
 
