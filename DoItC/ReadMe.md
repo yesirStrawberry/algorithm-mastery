@@ -5,7 +5,7 @@
 <br>
 
 <p align="center">
-  <img src="https://image.yes24.com/goods/57798536/XL" alt="Do it! 자료구조와 함께하는 알고리즘 입문 C언어 편" width="300">
+  <img src="./99_others/DoIt_c.jpg" width="300" alt="Do It 자료구조와 함께 배우는 알고리즘 입문 이미지">
 </p>
 
 ---
