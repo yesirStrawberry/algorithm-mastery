@@ -2,19 +2,13 @@
 #include <stdlib.h>
 #include "CircDbLinkedList.h"
 
-/*
-typedef struct __node{
-    member dada;
-    struct __node *next;
-    struct __node *prev;
-}Dnode;
-
-typedef struct{
-    Dnode *head;
-    Dnode *crnt;
-}Dlist;
-*/
-
+/**
+ * @brief 새로운 데이터 노드를 동적 할당 및 초기화합니다.
+ * @return 할당 성공 시 생성된 노드의 포인터, 메모리 할당 실패 시 NULL 반환
+ * @details calloc을 사용하여 노드의 모든 멤버(data, next, prev)를 
+ * 0(NULL)으로 안전하게 초기화하며 동적 할당을 수행합니다.
+ * 할당 실패 시 표준 에러 스트림(stderr)으로 로그를 출력합니다.
+ */
 static Dnode* alloc_Dnode() {
 	Dnode *new_node = calloc(1, sizeof(Dnode));
 	if(new_node == NULL) {
@@ -24,12 +18,28 @@ static Dnode* alloc_Dnode() {
 	return new_node;
 }
 
+/**
+ * @brief 지정된 노드의 데이터 필드와 양방향 링크 포인터를 설정합니다.
+ * @param n 설정을 변경할 대상 노드의 포인터
+ * @param data 노드에 저장할 원본 member 데이터의 포인터
+ * @param prev 대상 노드의 이전 노드(prev)로 연결할 주소
+ * @param next 대상 노드의 다음 노드(next)로 연결할 주소
+ * @details 인자로 받은 데이터의 값을 대상 노드에 복사하고, 
+ * 앞뒤 노드와의 링크 관계를 한 번에 매핑해 주는 헬퍼 함수입니다.
+ */
 static void set_Dnode(Dnode *n, const member *data, Dnode *prev, Dnode *next) {
 	n->data = *data;
 	n->prev = prev;
 	n->next = next;
 }
 
+/**
+ * @brief 원형 이중 연결 리스트가 비어있는 상태인지 확인합니다.
+ * @param list 검사할 리스트의 포인터
+ * @return 리스트가 비어있으면 1(참), 데이터 노드가 존재하면 0(거짓) 반환
+ * @details 더미 노드(head)의 다음 노드 포인터(next)가 다시 더미 노드 자신을 
+ * 가리키고 있는지 여부를 판별하여 리스트의 빈 상태를 체크합니다.
+ */
 static int is_empty(const Dlist *list) {
 	return list->head->next == list->head;
 }
