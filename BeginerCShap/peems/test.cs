@@ -20,6 +20,8 @@ class Program
         // (폐쇄망 환경이라도 기본 프레임워크에 포함되어 있으므로 외부 다운로드가 필요 없습니다)
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
+        int studentSize = 0;
+
         string filePath = "BeginerCShap/peems/test.csv";
         List<Student> students = new List<Student>();
 
@@ -51,6 +53,7 @@ class Program
             };
 
             students.Add(student);
+            studentSize++; 
         }
 
         // 결과 확인용 출력 (콘솔 창도 한글 출력을 지원해야 깨지지 않습니다)
@@ -59,5 +62,44 @@ class Program
         {
             Console.WriteLine($"ID: {s.Id}, 이름: {s.Name}, 점수: {s.Score}");
         }
+
+        for(int a = 1; a < studentSize; a++)
+        {
+            for(int b = studentSize - 1; b >= a; b--)
+            {
+                if(students[b - 1].Score > students[b].Score)
+                {
+                    int tmp = students[b - 1].Score;
+                    students[b].Score = students[b - 1].Score;
+                    students[b - 1].Score = tmp; 
+                }
+            }
+        }
+
+        Console.WriteLine("-------Score sorted-------");
+        foreach (var s in students)
+        {
+            Console.WriteLine($"ID: {s.Id}, 이름: {s.Name}, 점수: {s.Score}");
+        }
+
+        string outputFilePath = "BeginerCShap/peems/output.csv";
+
+        using (StreamWriter sw = new StreamWriter(outputFilePath, false, koreanEncoding))
+        {
+            // 1. 헤더 작성
+            sw.WriteLine("군번,이름,점수");
+
+            // 2. 데이터 반복문 돌며 한 줄씩 작성
+            foreach (var student in students)
+            {
+                // 변수들을 콤마로 연결하여 한 행의 문자열로 만듭니다.
+                string line = $"{student.Id},{student.Name},{student.Score}";
+                
+                // 파일에 기록
+                sw.WriteLine(line);
+            }
+        }
+
+        Console.WriteLine("CSV 파일 변환 및 저장 완료!");
     }
 }
