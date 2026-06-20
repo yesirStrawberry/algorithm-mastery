@@ -9,7 +9,7 @@ class Trainee : IComparable<Trainee>
     public string Name{get; private set;}
     public List<double> Scores{get; private set;}
     public List<int> AspireCodes{get; private set;}
-    public Dictionary<string, double> ConvertedScores{get; private set;}
+    public Dictionary<int, double> ConvertedScores{get; private set;}
     private int _idx; 
     public int Idx{
         get {return _idx; }
@@ -24,7 +24,7 @@ class Trainee : IComparable<Trainee>
         Name         = ""; 
         Scores       = new List<double>(); 
         AspireCodes  = new List<int>();  
-        ConvertedScores = new Dictionary<string, double>();
+        ConvertedScores = new Dictionary<int, double>();
         Idx          = 0;  
         IsColorBlind = false; 
         IsAtopy      = false; 
@@ -37,7 +37,7 @@ class Trainee : IComparable<Trainee>
         Name         = name; 
         Scores       = scores;
         AspireCodes  = aspireCodes;  
-        ConvertedScores = new Dictionary<string, double>();
+        ConvertedScores = new Dictionary<int, double>();
         Idx          = 0; 
         Scores.Add(0); 
         IsColorBlind = isColor; 
@@ -57,14 +57,16 @@ class Trainee : IComparable<Trainee>
     }
     public double GetConvertedScore(int specialityCode)
     {
-        string key = specialityCode.ToString();
         double score;
-        if(!ConvertedScores.TryGetValue(key, out score))
+        // ⭕ 딕셔너리에 특기 코드가 존재하면 그 점수를 반환합니다.
+        if (ConvertedScores.TryGetValue(specialityCode, out score))
         {
-            Console.WriteLine("특수조건자에 점수를 입력해주세요");
-            throw new KeyNotFoundException("특수조건자 점수가 없습니다: " + key);
+            return score;
         }
-        return score;
+        
+        // ⭕ 데이터 파일에 해당 특기 점수가 없는 경우, 
+        // 메시지를 띄우거나 에러를 내지 않고 기본점수 0.0점을 주어 안전하게 진행시킵니다.
+        return 0.0;
     }
     public bool IsPreSpec(int code)
     {
@@ -158,6 +160,12 @@ class AssignManager
         while(TraineeStack.Count > 0)
         {
             Trainee tr = TraineeStack.Pop();
+            if(tr.Idx >= 3)
+            {
+                this.AfterStack.Push(tr);
+                continue;
+            }
+
             Speciality spec = this.FindSpeciality(tr.AspireCodes[tr.Idx]);
             if(spec == null){
                 tr.Idx++; 
@@ -172,7 +180,7 @@ class AssignManager
             else {
                 returnedTr.PreSpecialityCodes.Add(spec.Code);
                 returnedTr.Idx++;
-                if(returnedTr.Idx <= 3)  // Idx를 0~3으로 제한
+                if(returnedTr.Idx < 3)  // Idx를 0~3으로 제한
                     TraineeStack.Push(returnedTr);
                 else
                     AfterStack.Push(returnedTr);
@@ -464,15 +472,15 @@ class AssignManager
             if(string.IsNullOrEmpty(line)) continue;
 
             string[] parts = line.Split(',');
-            if(parts.Length < 4) continue;
+            if(parts.Length < 5) continue;
 
             try
             {
                 int code = int.Parse(parts[0].Trim());
                 string name = parts[1].Trim();
                 int capacity = int.Parse(parts[2].Trim());
-                bool permitColorBlind = bool.Parse(parts[3].Trim() != "" ? "true" : "false");
-                bool permitAtopy = bool.Parse(parts[4].Trim() != "" ? "true" : "false");
+                bool permitColorBlind = parts[3].Trim() == ""; 
+                bool permitAtopy = parts[4].Trim() == "";
 
                 Speciality spec = new Speciality(code, name, capacity, permitAtopy, permitColorBlind);
                 AllSpecialities.Add(spec);
@@ -528,15 +536,16 @@ class AssignManager
                 {
                     for(int j = 10; j < headerParts.Length && j < parts.Length; j++)
                     {
-                        string specCode = headerParts[j].Trim();
+                        string specCodeStr = headerParts[j].Trim();
                         string scoreStr = parts[j].Trim();
                         
-                        if(!string.IsNullOrEmpty(specCode) && !string.IsNullOrEmpty(scoreStr))
+                        if(!string.IsNullOrEmpty(specCodeStr) && !string.IsNullOrEmpty(scoreStr))
                         {
                             try
                             {
                                 double score = double.Parse(scoreStr);
-                                trainee.ConvertedScores[specCode] = score;
+                                int specCodeInt = int.Parse(specCodeStr);
+                                trainee.ConvertedScores[specCodeInt] = score;
                             }
                             catch(FormatException)
                             {
@@ -609,14 +618,15 @@ class AssignManager
     // ⭕ 빌드 에러 해결을 위한 진입점 클래스 추가
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            string baseDir = "BeginnerCSharp/peems/";
+            string baseDir = "/workspaces/algorithm-mastery/BeginnerCSharp/peems/";
             
             AssignManager manager = new AssignManager();
             manager.LoadAllSpecialities(baseDir + "특기TO 일반.csv");
             manager.LoadData(baseDir + "훈련병_일반.csv");
             manager.RunAssignment();
+            manager.SaveToCsv();
             Console.WriteLine("배치가 완료되었습니다.");
         }
     }
