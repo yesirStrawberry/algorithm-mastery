@@ -1,10 +1,10 @@
 using System; 
 using System.Collections.Generic;
-
-/*permitbounce는 점수 낮은 곳임*/
+using System.Linq;
+using System.Linq.Expressions;
 
 class Trainee : IComparable<Trainee>
-{
+{   
     public string SoldierCode{get; private set;}
     public string Name{get; private set;}
     public List<double> Scores{get; private set;}
@@ -15,9 +15,10 @@ class Trainee : IComparable<Trainee>
         get {return _idx; }
         set {_idx = Math.Min(value, 3); }
     }
-    public bool IsColorBlind; 
-    public bool IsAtopy; 
+    public bool IsColorBlind {get; private set;} 
+    public bool IsAtopy {get; private set;}
     public List<int> PreSpecialityCodes{get; set;}
+    public int CurrentSpeciality{get; set;}
     public Trainee()
     {
         SoldierCode  = "";
@@ -29,6 +30,7 @@ class Trainee : IComparable<Trainee>
         IsColorBlind = false; 
         IsAtopy      = false; 
         PreSpecialityCodes = new List<int>();
+        CurrentSpeciality = 0;
     }
     public Trainee(string soldier_code, string name, List<double> scores, 
                    List<int> aspireCodes, bool isColor, bool isAtopy)
@@ -43,6 +45,7 @@ class Trainee : IComparable<Trainee>
         IsColorBlind = isColor; 
         IsAtopy      = isAtopy; 
         PreSpecialityCodes = new List<int>();
+        CurrentSpeciality = 0;
     }
     public int CompareTo(Trainee other)
     {
@@ -50,7 +53,17 @@ class Trainee : IComparable<Trainee>
         int ScoreCmp = other.Scores[other.Idx].CompareTo(this.Scores[this.Idx]); 
         if(ScoreCmp != 0) return ScoreCmp;
         ScoreCmp = this.Idx.CompareTo(other.Idx); 
-        if(ScoreCmp != 0) return ScoreCmp; 
+        if(ScoreCmp != 0) return ScoreCmp;
+        
+        // Idx >= 3인 경우, GetConvertedScore로 비교
+        if(this.Idx >= 3 && other.Idx >= 3)
+        {
+            double thisScore = this.GetConvertedScore(this.CurrentSpeciality);
+            double otherScore = other.GetConvertedScore(other.CurrentSpeciality);
+            ScoreCmp = otherScore.CompareTo(thisScore); // 높은 점수가 먼저 오도록 역순
+            if(ScoreCmp != 0) return ScoreCmp;
+        }
+        
         /*peem 뜯어서 봐야되는 부분, 나중에 수정*/
         ScoreCmp = this.SoldierCode.CompareTo(other.SoldierCode);
         return ScoreCmp;   
@@ -80,12 +93,13 @@ class Trainee : IComparable<Trainee>
 
 class Speciality : IComparable<Speciality>
 {
-    public int Code{get;}
-    public string Name{get;}
-    public int Capacity{get;} 
-    public bool PermitColorBlind{get;}
-    public bool PermitAtopy{get;}
-    public SortedSet<Trainee> AcceptedList{get;} 
+    public static int TotalCount = 0;
+    public int Code{get; private set;}
+    public string Name{get; private set;}
+    public int Capacity{get; private set;} 
+    public bool PermitColorBlind{get; private set;}
+    public bool PermitAtopy{get; private set;}
+    public SortedSet<Trainee> AcceptedList{get; private set;} 
     public Speciality()
     {
         Code = 0; 
@@ -110,14 +124,77 @@ class Speciality : IComparable<Speciality>
     }
     public Trainee AddTrainee(Trainee t)
     {
+        Speciality.TotalCount++;
         if(t.IsAtopy == true && this.PermitAtopy == false) return t; 
-        if(t.IsColorBlind == true && this.PermitColorBlind == false) return t; 
+        if(t.IsColorBlind == true && this.PermitColorBlind == false) return t;
+        for(int i = 0; i < t.PreSpecialityCodes.Count; i++)
+        {
+            if(t.PreSpecialityCodes[i] == this.Code) return t; 
+        }
         
+        t.CurrentSpeciality = this.Code;
         AcceptedList.Add(t); 
         if(AcceptedList.Count <= Capacity) return null;
         Trainee lastTrainee = AcceptedList.Max; 
         AcceptedList.Remove(lastTrainee); 
         return lastTrainee; 
+    }
+    public Trainee AddTraineeForce(Trainee tr) // 특수조건자 강제 배치용
+    {
+        Speciality.TotalCount++;
+        if(tr.IsAtopy == true && this.PermitAtopy == false) return tr; 
+        if(tr.IsColorBlind == true && this.PermitColorBlind == false) return tr;
+        for(int i = 0; i < tr.PreSpecialityCodes.Count; i++)
+        {
+            if(tr.PreSpecialityCodes[i] == this.Code) return tr; 
+        }
+        
+        tr.CurrentSpeciality = this.Code; 
+        if(AcceptedList.Count < Capacity)
+        {
+            AcceptedList.Add(tr);
+            return null; 
+        }
+        Trainee lastTrainee = null; 
+        
+        using (var enumerator = AcceptedList.Reverse().GetEnumerator())
+        {
+            while (enumerator.MoveNext())
+            {
+                Trainee currTr = enumerator.Current; 
+                if(currTr.Idx < 3) 
+                {
+                    lastTrainee = currTr; break; 
+                } 
+                if(!currTr.IsAtopy && !currTr.IsColorBlind)
+                {
+                    lastTrainee = currTr; break; 
+                }
+            }
+        }
+
+        if(lastTrainee != null)
+        {
+            AcceptedList.Remove(lastTrainee); 
+            tr.CurrentSpeciality = this.Code; 
+            AcceptedList.Add(tr);
+            return lastTrainee;    
+        }
+        else
+        {
+            Trainee worstSpecialTrianee = AcceptedList.Max; 
+            if(tr.CompareTo(worstSpecialTrianee) > 0)
+            {
+                return tr; 
+            }
+            else
+            {
+                AcceptedList.Remove(worstSpecialTrianee); 
+                tr.CurrentSpeciality = this.Code; 
+                AcceptedList.Add(tr);
+                return worstSpecialTrianee; 
+            }
+        }
     }
     public int CompareTo(Speciality other)
     {
@@ -134,16 +211,16 @@ class Speciality : IComparable<Speciality>
 
 class AssignManager
 {
-    public Stack<Trainee> TraineeStack{get;} 
-    public Stack<Trainee> AfterStack{get;}
+    public Stack<Trainee> TraineeStack{get; private set;} 
+    public Stack<Trainee> AfterStack{get; private set;}
     public List<Speciality> AllSpecialities{get; set;} 
-    public SortedSet<Speciality> SortedSpecialites{get; set;}
+    public int AllTo{get; private set;}  // 총 수용 인원
     public AssignManager()
     {
         TraineeStack = new Stack<Trainee>();
         AfterStack = new Stack<Trainee>();
         AllSpecialities = new List<Speciality>();
-        SortedSpecialites = new SortedSet<Speciality>();
+        AllTo = 0;  // 초기화
     }
 
     public Speciality FindSpeciality(int code)
@@ -185,15 +262,6 @@ class AssignManager
                 else
                     AfterStack.Push(returnedTr);
             } 
-        }
-    }
-
-    public void SortSpectiality()
-    {
-        SortedSpecialites.Clear();
-        for(int i = 0; i < AllSpecialities.Count; i++)
-        {
-            SortedSpecialites.Add(AllSpecialities[i]);
         }
     }
 
@@ -317,7 +385,7 @@ class AssignManager
         {
             Speciality candidate = eligible[index];
             Dictionary<Speciality, List<Trainee>> plan = new Dictionary<Speciality, List<Trainee>>();
-            SimulatePlacement(specialNeeds, eligible, candidate, plan);  // ← 이제 반환값 없음
+            SimulatePlacement(specialNeeds, eligible, candidate, plan);
             Speciality best = BestSpecialityInPlan(plan);
             if(best == candidate)
                 return candidate;
@@ -434,7 +502,7 @@ class AssignManager
             for(int j = 0; j < assigned.Count; j++)
             {
                 Trainee tr = assigned[j];
-                Trainee dropped = spec.AddTrainee(tr);
+                Trainee dropped = spec.AddTraineeForce(tr);
                 if(dropped != null)
                 {
                     dropped.PreSpecialityCodes.Add(spec.Code);
@@ -448,7 +516,6 @@ class AssignManager
     public void RunAssignment()
     {
         AssignByPreference();
-        SortSpectiality();
         AssignAfter();
         while(TraineeStack.Count > 0 || AfterStack.Count > 0)
         {
@@ -479,11 +546,12 @@ class AssignManager
                 int code = int.Parse(parts[0].Trim());
                 string name = parts[1].Trim();
                 int capacity = int.Parse(parts[2].Trim());
-                bool permitColorBlind = parts[3].Trim() == ""; 
-                bool permitAtopy = parts[4].Trim() == "";
+                bool permitAtopy = parts[3].Trim() == ""; 
+                bool permitColorBlind = parts[4].Trim() == "";
 
                 Speciality spec = new Speciality(code, name, capacity, permitAtopy, permitColorBlind);
                 AllSpecialities.Add(spec);
+                AllTo += capacity;  // 총 수용 인원 계산
             }
             catch(FormatException ex)
             {
@@ -501,6 +569,13 @@ class AssignManager
         }
 
         string[] lines = System.IO.File.ReadAllLines(filePath, System.Text.Encoding.UTF8);
+        int lineLenght = lines.Length;
+        if(lines.Length - 1 != AllTo)
+        {
+            Console.WriteLine("훈련병 파일의 행 수가 예상과 다릅니다: " + filePath);
+            return;
+        }
+
         string[] headerParts = lines[0].Split(',');
         for(int i = 1; i < lines.Length; i++)
         {
@@ -567,21 +642,25 @@ class AssignManager
         {
             Speciality spec = AllSpecialities[i];
             string safeName = spec.Name;
+            string numberPrefix = i.ToString("D2") + "_";
             char[] invalidChars = System.IO.Path.GetInvalidFileNameChars();
             for(int j = 0; j < invalidChars.Length; j++)
             {
                 safeName = safeName.Replace(invalidChars[j].ToString(), "_");
             }
 
-            string fileName = safeName + "결과.csv";
+            string fileName = numberPrefix + safeName + "결과.csv";
             System.IO.StreamWriter writer = null;
             try
             {
                 writer = new System.IO.StreamWriter(fileName, false, System.Text.Encoding.UTF8);
-                writer.WriteLine("군번,이름,합격점수");
+                writer.WriteLine("군번,이름,합격점수,색맹여부, 아토피여부, 1~3지망낙방여부");
 
-                foreach(Trainee tr in spec.AcceptedList)
+                List<Trainee> acceptedList = new List<Trainee>(spec.AcceptedList);
+                for(int k = 0; k < acceptedList.Count; k++)
                 {
+                    Trainee tr = acceptedList[k];
+
                     double score;
                     if(tr.Idx < 3)
                     {
@@ -599,7 +678,11 @@ class AssignManager
                         }
                     }
 
-                    writer.WriteLine(tr.SoldierCode + "," + tr.Name + "," + score);
+                    string ColorBlindFlag = tr.IsColorBlind ? "예" : "아니오";
+                    string AtopyFlag = tr.IsAtopy ? "예" : "아니오";
+                    string rejectedAllChoicesFlag = (tr.Idx >= 3) ? "예" : "아니오";
+
+                    writer.WriteLine(tr.SoldierCode + "," + tr.Name + "," + score + "," + ColorBlindFlag + "," + AtopyFlag + "," + rejectedAllChoicesFlag);
                 }
             }
             catch(System.Exception ex)
@@ -614,20 +697,29 @@ class AssignManager
                 }
             }
         }
+        Console.WriteLine("배치가 완료되었습니다.");
     }
     // ⭕ 빌드 에러 해결을 위한 진입점 클래스 추가
     class Program
     {
         static void Main()
         {
-            string baseDir = "/workspaces/algorithm-mastery/BeginnerCSharp/peems/";
-            
+            string baseDir = "/workspaces/algorithm-mastery/BeginnerCSharp/peems/"; 
+            //Console.Write("특기 파일 이름을 입력하세요:");
+            // string SpecialityFileName = Console.ReadLine();
+
+            // Console.Write("훈련병 파일 이름을 입력하세요:");
+            // string TraineeFileName = Console.ReadLine();
+
+            string SpecialityFileName = "특기TO_lite.csv";
+            string TraineeFileName = "훈련병_디버깅용_30명.csv";
+
             AssignManager manager = new AssignManager();
-            manager.LoadAllSpecialities(baseDir + "특기TO 일반.csv");
-            manager.LoadData(baseDir + "훈련병_일반.csv");
+            manager.LoadAllSpecialities(baseDir + SpecialityFileName);
+            manager.LoadData(baseDir + TraineeFileName);
             manager.RunAssignment();
             manager.SaveToCsv();
-            Console.WriteLine("배치가 완료되었습니다.");
+            Console.WriteLine("총 AddTrainee 회수: " + Speciality.TotalCount);
         }
     }
 }
