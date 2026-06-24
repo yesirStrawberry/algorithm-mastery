@@ -232,6 +232,17 @@ class AssignManager
         return null; 
     }
 
+    public void RunAssignment()
+    {
+        AssignByPreference();
+        AssignAfter();
+        while(TraineeStack.Count > 0 || AfterStack.Count > 0)
+        {
+            AssignByPreference();
+            AssignAfter();
+        }
+    }
+    
     public void AssignByPreference()
     {
         while(TraineeStack.Count > 0)
@@ -410,7 +421,7 @@ class AssignManager
     }
 
     private void SimulatePlacement(List<Trainee> specialNeeds, List<Speciality> eligible, Speciality reference, Dictionary<Speciality, List<Trainee>> plan)
-    {
+    {   
         plan.Clear();
         for(int i = 0; i < eligible.Count; i++)
             plan[eligible[i]] = new List<Trainee>();
@@ -511,17 +522,6 @@ class AssignManager
             }
         }
         return droppedList;
-    }
-
-    public void RunAssignment()
-    {
-        AssignByPreference();
-        AssignAfter();
-        while(TraineeStack.Count > 0 || AfterStack.Count > 0)
-        {
-            AssignByPreference();
-            AssignAfter();
-        }
     }
 
     void LoadAllSpecialities(string filePath)
@@ -636,7 +636,7 @@ class AssignManager
             }
         }
     }
-    public void SaveToCsv()
+    public void SaveToCsvSpec()
     {
         for(int i = 0; i < AllSpecialities.Count; i++)
         {
@@ -699,6 +699,79 @@ class AssignManager
         }
         Console.WriteLine("배치가 완료되었습니다.");
     }
+    
+    public void SaveToCsvFile(string TraineeFileName)
+    {
+        string pureName = System.IO.Path.GetFileNameWithoutExtension(TraineeFileName);
+        string fileName = pureName + "_결과.csv";
+        System.IO.StreamWriter writer = null;
+
+        try
+        {
+            // 파일 오픈을 try 블록 전체의 최상단에서 수행
+            writer = new System.IO.StreamWriter(fileName, false, System.Text.Encoding.UTF8);
+            writer.WriteLine("군번, 이름, 색약, 아토피, 최종특기번호, 최종점수, 1여부, 2여부, 3여부");
+
+            for (int i = 0; i < AllSpecialities.Count; i++)
+            {
+                Speciality spec = AllSpecialities[i];
+                
+                // 데이터 접근 중 터질 수 있는 예외를 개별적으로 잡아내기 위함
+                using (var enumerator = spec.AcceptedList.GetEnumerator())
+                {
+                    while (enumerator.MoveNext())
+                    {
+                        try
+                        {
+                            Trainee tr = enumerator.Current;
+                            string scoreStr = "";
+
+                            // tr.Scores나 인덱스 범위 확인에서 에러가 날 수 있으므로 방어 코드 필요 && tr.Scores != null && tr.Scores.Count > tr.Idx
+                            if (tr.Idx < 3 && tr.Scores != null && tr.Scores.Count > tr.Idx)
+                            {
+                                scoreStr = tr.Scores[tr.Idx].ToString();
+                            }
+                            else
+                            {
+                                scoreStr = "임의분류";
+                            }
+
+                            string colorBlindFlag = tr.IsColorBlind ? "o" : "x";
+                            string atopyFlag = tr.IsAtopy ? "o" : "x";
+                            string acquireFlag = (tr.Idx == 0 ? "o" : "x") + "," +
+                                                (tr.Idx == 1 ? "o" : "x") + "," +
+                                                (tr.Idx == 2 ? "o" : "x");
+
+                            string line = string.Format("{0},{1},{2},{3},{4},{5},{6}",
+                                tr.SoldierCode, tr.Name, colorBlindFlag, atopyFlag,
+                                spec.Name, scoreStr, acquireFlag);
+
+                            writer.WriteLine(line);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            // 특정 교육생 한 명의 데이터 오류로 전체 파일 작성이 중단되거나 깨지는 것을 방지
+                            Console.WriteLine("교육생 데이터 처리 오류: " + ex.Message);
+                        }
+                    }
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Console.WriteLine("CSV 파일 쓰기 오류: " + fileName + " - " + ex.Message);
+        }
+        finally
+        {
+            // SaveToCsvSpec처럼 어떤 상황에서든 반드시 안전하게 파일을 닫도록 보장
+            if (writer != null)
+            {
+                writer.Close();
+            }
+        }
+
+        Console.WriteLine("배치가 완료되었습니다.");
+    }
     // ⭕ 빌드 에러 해결을 위한 진입점 클래스 추가
     class Program
     {
@@ -711,14 +784,16 @@ class AssignManager
             // Console.Write("훈련병 파일 이름을 입력하세요:");
             // string TraineeFileName = Console.ReadLine();
 
-            string SpecialityFileName = "특기TO_lite.csv";
-            string TraineeFileName = "훈련병_디버깅용_30명.csv";
+            string SpecialityFileName = "특기TO_일반.csv";
+            string TraineeFileName = "훈련병_일반_비선호반영.csv";
 
             AssignManager manager = new AssignManager();
             manager.LoadAllSpecialities(baseDir + SpecialityFileName);
+
             manager.LoadData(baseDir + TraineeFileName);
             manager.RunAssignment();
-            manager.SaveToCsv();
+            manager.SaveToCsvFile(TraineeFileName);
+            manager.SaveToCsvSpec(); 
             Console.WriteLine("총 AddTrainee 회수: " + Speciality.TotalCount);
         }
     }
