@@ -2,13 +2,13 @@
 using namespace std;
 
 int arr[104][104], visited[104][104];
-int n, m, cnt; 
+int n, m; 
 const int dy[] = {-1, 0, 1, 0}; 
 const int dx[] = {0, 1, 0, -1}; 
 
-void dfs(int y, int x){
+int dfs(int y, int x){
     visited[y][x] = true; 
-    cnt++; 
+    int ret = 1;  
     
     for(int i = 0; i < 4; i++){
         int ny = y + dy[i]; 
@@ -17,8 +17,9 @@ void dfs(int y, int x){
         if(ny < 0 || ny >= n || nx < 0 || nx >= m) continue; 
         if(visited[ny][nx]) continue; 
         if(arr[ny][nx] == 1) continue; 
-        dfs(ny, nx); 
+        ret += dfs(ny, nx); 
     }
+    return ret; 
 }
 
 int main(void){
@@ -43,9 +44,7 @@ int main(void){
         for(int j = 0; j < m; j++){
             if(visited[i][j]) continue; 
             if(arr[i][j] == 1) continue; 
-            cnt = 0; 
-            dfs(i, j); 
-            ret.push_back(cnt); 
+            ret.push_back(dfs(i, j)); 
         }
     }
     
