@@ -1,5 +1,3 @@
-// 미로탐색
-
 #include <bits/stdc++.h>
 using namespace std; 
 
