@@ -7,7 +7,6 @@ int main(void){
   string s; 
   while(true){
     getline(cin, s);
-    cin.ignore(); 
     if(s == ".") break; 
 
     stack<char> st;  
