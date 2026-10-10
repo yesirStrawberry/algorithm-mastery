@@ -1,20 +1,28 @@
 #include <bits/stdc++.h>
 using namespace std; 
-#define SWAP(prev, i, j) do{int curr = arr[i][j]; arr[i][j] = prev; prev = curr; cout << i + 1 << (char)(j + 'A') << '\n'; } while(false)
+#define SWAP(prev, i, j) do{int curr = arr[i][j]; arr[i][j] = prev; prev = curr; } while(false)  
 
 int n, m, t, arr[54][54], nxt[54][54]; 
 int ay, ax, by, bx, cnt; 
 const int dy[] = {-1, 0, 1, 0}, dx[] = {0, 1, 0, -1}; 
 
-void printArr(){
-    cout << "arr" << '\n'; 
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < m; j++) cout << arr[i][j] << ", "; 
-        cout << '\n'; 
+void setInput(); 
+void spread(); 
+void circulate(int fil, int cil); 
+int getRet(); 
+
+int main(void){
+    setInput(); 
+    for(int i = 0; i < t; i++){
+        spread(); 
+        circulate(ay, by); 
     }
+    cout << getRet() << '\n'; 
+    return 0; 
 }
 
 void setInput(){
+    ios::sync_with_stdio(false); cin.tie(nullptr); 
     cin >> n >> m >> t; 
     for(int i = 0; i < n; i++){
         for(int j = 0; j < m; j++){
@@ -29,6 +37,7 @@ void setInput(){
         }  
     }
 }
+ 
 void spread(){
     fill(&nxt[0][0], &nxt[0][0] + 54*54, 0); 
     nxt[by][bx] = -1; 
@@ -58,26 +67,23 @@ void spread(){
 
 void circulate(int fil, int cil){
     int prev = 0, i = fil, j = 1, curr; 
-    for(j = j; j < m - 1; j++){SWAP(prev, i, j); }
-    cout << '\n'; 
-    for(i = i; i > 0; i--){SWAP(prev, i, j);}
-    cout << '\n'; 
-    for(j = j; j > 0; j--){SWAP(prev, i, j);}
-    cout << '\n'; 
-    for(i = i; i < fil; i++){SWAP(prev, i, j);}
+    for(; j < m - 1; j++) SWAP(prev, i, j); 
+    for(; i > 0; i--) SWAP(prev, i, j);
+    for(; j > 0; j--) SWAP(prev, i, j);
+    for(; i < fil; i++) SWAP(prev, i, j);
     prev = 0; i = cil; j = 1; 
+    for(; j < m - 1; j++) SWAP(prev, i, j); 
+    for(; i < n - 1; i++) SWAP(prev, i, j); 
+    for(; j > 0; j--) SWAP(prev, i, j); 
+    for(; i > cil; i--) SWAP(prev, i, j);
 }
 
-int main(void){
-    setInput(); 
-    // for(int i = 0; i < t; i++){
-    //     spread(); 
-    //     circulate(ay, by); 
-    // }
-
-    printArr(); 
-    circulate(ay, by);  
-    printArr(); 
-
-    return 0; 
+int getRet(){
+    int ret = 0; 
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
+            if(arr[i][j] != -1) ret += arr[i][j];  
+        }
+    }
+    return ret; 
 }
