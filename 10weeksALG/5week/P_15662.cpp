@@ -1,11 +1,10 @@
 #include <bits/stdc++.h>
 using namespace std; 
 
-int visited[1004]; 
 int t, k; 
 pair<int, int> op[1004], arr[1004]; 
 
-void setInput(){
+void set_input(){
     ios::sync_with_stdio(false); cin.tie(nullptr);
     cin >> t; 
     for(int i = 0; i < t; i++){
@@ -16,7 +15,7 @@ void setInput(){
             bs += (c - '0'); 
             bs <<= 1; 
         }
-        bs >>= 1; 
+        bs >>= 1;
         arr[i].first = bs; 
     }
     cin >> k; 
@@ -30,36 +29,40 @@ void rotate(pair<int, int>& p){
     if(p.second == 0) return; 
     int bs = p.first;
     if(p.second == 1){
-        int tmp = (bs & 1) << 7; 
-        bs >>= 1; 
-        bs += tmp; 
-        bs &= 0x000000ff; 
+        bs = (bs >> 1) | ((bs & 1) << 7); 
     }else if(p.second == -1){
-        int tmp = (bs & (1 << 7)) >> 7; 
-        bs <<= 1; 
-        bs += tmp; 
-        bs &= 0x000000ff; 
+        bs = ((bs << 1) & 0xff) | ((bs >> 7) & 1); 
     }
+    bs &= 0xff;
     p.first = bs; 
     p.second = 0; 
     return; 
 }
 
-void dfs(int x, int dir){
-    visited[x] = 1; 
-    arr[x].second = dir; 
-    for(int d : {-1, 1}){
-        int nx = x + d; 
-        if(nx < 0 || nx >= t) continue; 
-        if(visited[nx]) continue; 
-        int x_side  =  arr[x].first & (1 << (3 + 2 * d)); 
-        int nx_side = arr[nx].first & (1 << (3 - 2 * d)); 
-        if((x_side && nx_side) || (!x_side && !nx_side)) continue; 
-        dfs(nx, -dir); 
+void set_dir(int sx, int sdir){
+    int dir = sdir; 
+    int nx, x_side, nx_side;
+    arr[sx].second = dir;   
+    for(int x = sx; x < t - 1; x++){
+        nx = x + 1; 
+        x_side = arr[x].first & (1 << 5); 
+        nx_side = arr[nx].first & (1 << 1); 
+        if(bool(x_side) == bool(nx_side)) break; 
+        dir = -dir; 
+        arr[nx].second = dir; 
+    }
+    dir = sdir; 
+    for(int x = sx; x > 0; x--){
+        nx = x - 1; 
+        x_side = arr[x].first & (1 << 1); 
+        nx_side = arr[nx].first & (1 << 5); 
+        if(bool(x_side) == bool(nx_side)) break; 
+        dir = -dir; 
+        arr[nx].second = dir; 
     }
 }
 
-int getSolve(){
+int get_solve(){
     int cnt = 0; 
     int idx7 = (1 << 7); 
     for(int i = 0; i < t; i++){
@@ -69,15 +72,14 @@ int getSolve(){
 }
 
 int main(){ 
-    setInput(); 
+    set_input(); 
     for(int i = 0; i < k; i++){
         int idx = op[i].first; 
         int dir = op[i].second; 
-        dfs(idx, dir); 
+        set_dir(idx, dir);  
         for(int j = 0; j < t; j++) rotate(arr[j]); 
-        fill(&visited[0], &visited[0] + 1004, 0); 
     }
-    cout << getSolve() << '\n'; 
+    cout << get_solve() << '\n'; 
 
     return 0; 
 }
